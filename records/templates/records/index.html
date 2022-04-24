@@ -2,6 +2,22 @@
 
 {% block content %}
 
-<!-- {%%} -->
+{% if request.user.is_authenticated %}
+<div class="row">
+    <div class="col-3">
+        <a class="btn btn-primary" href="">Add New Record</a>
+    </div>
+    <div class="col-3">
+        <a class="btn btn-warning" href="">Show Existing Data</a>
+    </div>
+</div>
+<hr>
+<p class="lead">Lorem ipsum dolor sit amet consectetur adipisicing elit. Placeat nobis maiores fugit dolores pariatur, facere quaerat iste quos distinctio a hic, illum quasi delectus. Eos illo optio sint doloremque provident!</p>
+<p class="lead">Lorem ipsum dolor sit amet consectetur adipisicing elit. Placeat nobis maiores fugit dolores pariatur, facere quaerat iste quos distinctio a hic, illum quasi delectus. Eos illo optio sint doloremque provident!</p>
+{% else %}
+
+<p class="lead">Lorem ipsum, dolor sit amet consectetur adipisicing elit. Eos illum, quasi commodi voluptatibus, sit consequatur, aperiam dolor in perferendis quibusdam eligendi ipsum similique quas laboriosam asperiores expedita deleniti? Nemo, delectus.</p>
+
+{% endif %}
 
 {% endblock %}
