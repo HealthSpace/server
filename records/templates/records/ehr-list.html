@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2>Your Medical Records</h2>
+<a href="{% url 'index' %}">Back to Home</a>
+<hr>
+<div class="row">
+    {% for each in data %}
+    <div class="col-8 mt-2">
+        <div class="card">
+            <div class="card-body">
+              Record: {{each.name}} <br>
+              Data Value: {{each.value}}
+            </div>
+          </div>
+    </div>
+    {% empty %}
+        <p class="lead">No Health Records Available!</p>
+    {% endfor %}
+</div>
+{% endblock %}

@@ -96,7 +96,6 @@ def add_ehr(request):
 
             f = Fernet(private_key)
 
-            # print(private_key)
             encrypted_data = ehr_obj.ehr
             token = None
             new_entry_json = None
@@ -104,11 +103,11 @@ def add_ehr(request):
                 encrypted_data = encrypted_data.encode('utf-8')
                 decrypted_data = f.decrypt(encrypted_data)
 
-                existing_extry = json.loads(decrypted_data)
+                existing_entry = json.loads(decrypted_data)
                 
-                existing_extry.append(new_record)
+                existing_entry.append(new_record)
 
-                new_entry_json = json.dumps(existing_extry).encode('utf-8')
+                new_entry_json = json.dumps(existing_entry).encode('utf-8')
                 token = f.encrypt(new_entry_json).decode('utf-8')
             else:
                 new_entry = []
@@ -151,21 +150,38 @@ def retrieve_ehr(request):
     '''
     -> Gets hashData and PrivateKey from Blockchain
     -> Verifies Authenticity
-    -> return the decripted data
+    -> Returns the decripted data
     '''
     ehr_obj = request.user.record
     unique_id = ehr_obj.unique_id
-    print(unique_id)
     if(unique_id == None):
         messages.error(request, 'No EHR Exists!, Please Contact HealthSpace')
         return redirect("index")
     
     ehr = w3.eth.contract(address=CONTRACT_ADDRESS, abi=abi)
+
     private_key = ehr.functions.getUserKey(unique_id).call()
-    hashed_data = ehr.functions.getUserHashData(unique_id).call()
+    current_userHash = ehr.functions.getUserHashData(unique_id).call()
+    
+    f = Fernet(private_key)
 
+    encrypted_data = ehr_obj.ehr.encode('utf-8')
+    decryped_data = f.decrypt(encrypted_data)
+    data = json.loads(decryped_data)
 
-def verify_authenticity():
-    pass
-
+    calculated_userHash = hashlib.md5(decryped_data).hexdigest()
+    
+    # Verifing Authenticity
+    if(current_userHash == calculated_userHash):
+        cal_data = []
+        for s in data:
+            i = list(s.keys())[0]
+            j = list(s.values())[0]
+            temp = {}
+            temp['name'] = i
+            temp['value'] = j
+            cal_data.append(temp)
+        return render(request,'records/ehr-list.html',{"data":cal_data})
+    messages.error(request,"Authenticity Failed!, Data is Manipulated. Please Contact HealthSpace")
+    return redirect('index')
 
