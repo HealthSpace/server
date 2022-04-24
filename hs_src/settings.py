@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'django.contrib.sites',
     # Local
     'profiles.apps.ProfilesConfig',
+    'records.apps.RecordsConfig',
     # External
     'allauth',
     'allauth.account',
