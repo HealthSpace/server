@@ -5,10 +5,10 @@
 {% if request.user.is_authenticated %}
 <div class="row">
     <div class="col-3">
-        <a class="btn btn-primary" href="">Add New Record</a>
+        <a class="btn btn-primary" href="{% url 'add-ehr' %}">Add New Record</a>
     </div>
     <div class="col-3">
-        <a class="btn btn-warning" href="">Show Existing Data</a>
+        <a class="btn btn-warning" href="{% url 'retrieve-ehr' %}">Show Existing Data</a>
     </div>
 </div>
 <hr>

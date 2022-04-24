@@ -3,5 +3,6 @@ from . import views
 
 urlpatterns = [
     path("", views.index, name="index"),
-    path('create-ehr/',views.create_ehr,name='create-ehr'),
+    path('retrieve-ehr/',views.retrieve_ehr,name='retrieve-ehr'),
+    path('add-ehr/',views.add_ehr,name='add-ehr'),
 ]

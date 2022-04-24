@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+<h2>Add New Medical Record</h2>
+<a href="{% url 'index' %}">Back To Home</a>
+<hr>
+<div class="row">
+    <div class="col-lg-6 col-sm-12">
+        <form action="{% url 'add-ehr' %}" method="post">
+            {% csrf_token %}
+            {{ form|crispy }}
+            <p>Upload Record* (Coming Soon!)</p>
+            <input class="btn btn-success my-1" type="submit" value="Add Data">
+        </form>
+    </div>
+</div>
+
+{% endblock %}
+

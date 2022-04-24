@@ -1,8 +1,11 @@
-from django.shortcuts import render
+from django.shortcuts import redirect, render
 from .models import HealthRecord
+from .forms import EHRForm
 from django.contrib.auth.decorators import login_required
+from django.contrib import messages
 
 from cryptography.fernet import Fernet
+import hashlib
 import json
 from web3 import Web3
 
@@ -20,7 +23,7 @@ CHAIN_ID = 4
 
 data = json.loads(open('./artifacts/deployments/map.json').read())
 
-CONTRACT_ADDRESS = data['4']['EMR'][-1]
+CONTRACT_ADDRESS = data['4']['EMR'][0]
 
 f = open(f'./artifacts/deployments/4/{CONTRACT_ADDRESS}.json').read()
 
@@ -41,8 +44,7 @@ def index(request):
 
 def create_ehr(unique_id):
     '''
-    add new user
-    add the private key
+    Adds new user with unique_id and its private key
     '''
     private_key = Fernet.generate_key()
     ehr = w3.eth.contract(address=CONTRACT_ADDRESS, abi=abi)
@@ -70,25 +72,97 @@ def create_ehr(unique_id):
 @login_required
 def add_ehr(request):
     '''
-    -> with the key, get the data from blockchain
-    -> decript the current data
-    -> modifiy the dict and store it again
-    -> update hashData to blockchain
+    -> Gets Key from Blockchain
+    -> Decrypts the current data
+    -> Appends EHR to current Data  
     '''
-    pass
+    form = EHRForm(request.POST or None)
+    if(request.method == "POST"):
+        if(form.is_valid()):
+            name = form.cleaned_data.get('name')
+            data = form.cleaned_data.get('data')
+
+            new_record = {}
+            new_record[name]=  data
+
+            ehr_obj = request.user.record
+            unique_id = ehr_obj.unique_id
+            if(unique_id == None):
+                messages.error(request, 'No EHR Exists!, Please Contact HealthSpace')
+                return redirect("index")
+            
+            ehr = w3.eth.contract(address=CONTRACT_ADDRESS, abi=abi)
+            private_key = ehr.functions.getUserKey(unique_id).call()
+
+            f = Fernet(private_key)
+
+            # print(private_key)
+            encrypted_data = ehr_obj.ehr
+            token = None
+            new_entry_json = None
+            if(encrypted_data):
+                encrypted_data = encrypted_data.encode('utf-8')
+                decrypted_data = f.decrypt(encrypted_data)
+
+                existing_extry = json.loads(decrypted_data)
+                
+                existing_extry.append(new_record)
+
+                new_entry_json = json.dumps(existing_extry).encode('utf-8')
+                token = f.encrypt(new_entry_json).decode('utf-8')
+            else:
+                new_entry = []
+                new_entry.append(new_record)
+                new_entry_json = json.dumps(new_entry).encode('utf-8')
+
+                token = f.encrypt(new_entry_json).decode('utf-8')
+
+            ehr_obj.ehr = token
+            ehr_obj.save()
+
+            userHash = hashlib.md5(new_entry_json).hexdigest()
+
+            nonce = w3.eth.getTransactionCount(ACCOUNT)
+
+            # Building the transaction
+            tx = ehr.functions.addUserHash(unique_id,userHash).buildTransaction(
+                {
+                "chainId": CHAIN_ID,
+                "from": ACCOUNT,
+                "nonce": nonce,
+                "gasPrice": w3.eth.gas_price,
+                }
+            )
+
+            # Signing the transaction
+            signed_tx = w3.eth.account.sign_transaction(tx,private_key=PRIVATE_KEY)
+            tx_hash = w3.eth.send_raw_transaction(signed_tx.rawTransaction)
+
+            # executing the transaction
+            tx_receipt =  w3.eth.waitForTransactionReceipt(tx_hash)
+            messages.success(request,"EHR Added!")    
+            return redirect("index")
+        messages.error(request,"Invalid Form Data!")
+    return render(request,'records/create.html',{"form":form})
 
 
 @login_required
 def retrieve_ehr(request):
     '''
-    -> get hashData blockchain
-    -> get key blockhain
-    -> decript it and hash it
-    -> compare the two hashes (verify authticity)
+    -> Gets hashData and PrivateKey from Blockchain
+    -> Verifies Authenticity
     -> return the decripted data
     '''
-    ehr_obj = HealthRecord.objects.filter()
-    pass
+    ehr_obj = request.user.record
+    unique_id = ehr_obj.unique_id
+    print(unique_id)
+    if(unique_id == None):
+        messages.error(request, 'No EHR Exists!, Please Contact HealthSpace')
+        return redirect("index")
+    
+    ehr = w3.eth.contract(address=CONTRACT_ADDRESS, abi=abi)
+    private_key = ehr.functions.getUserKey(unique_id).call()
+    hashed_data = ehr.functions.getUserHashData(unique_id).call()
 
 
 def verify_authenticity():
