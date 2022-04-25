@@ -165,9 +165,13 @@ def retrieve_ehr(request):
     
     f = Fernet(private_key)
 
-    encrypted_data = ehr_obj.ehr.encode('utf-8')
-    decryped_data = f.decrypt(encrypted_data)
-    data = json.loads(decryped_data)
+    if(ehr_obj.ehr):
+        encrypted_data = ehr_obj.ehr.encode('utf-8')
+        decryped_data = f.decrypt(encrypted_data)
+        data = json.loads(decryped_data)
+    else:
+        messages.error(request,"No Health Records Found!")
+        return redirect('index')
 
     calculated_userHash = hashlib.md5(decryped_data).hexdigest()
     
