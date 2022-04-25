@@ -19,7 +19,7 @@ Django==4.0.3
 django-allauth==0.50.0
 django-crispy-forms==1.14.0
 eth-abi==3.0.0
-eth-account==0.5.7
+eth-account==0.6.1
 eth-hash==0.3.2
 eth-keyfile==0.5.1
 eth-keys==0.3.4
