@@ -3,6 +3,7 @@
 {% block content %}
 
 {% if request.user.is_authenticated %}
+<h3>Health ID: {{request.user.record.unique_id}}</h3>
 <div class="row">
     <div class="col-3">
         <a class="btn btn-primary" href="{% url 'add-ehr' %}">Add New Record</a>
@@ -12,8 +13,8 @@
     </div>
 </div>
 <hr>
-<p class="lead">Lorem ipsum dolor sit amet consectetur adipisicing elit. Placeat nobis maiores fugit dolores pariatur, facere quaerat iste quos distinctio a hic, illum quasi delectus. Eos illo optio sint doloremque provident!</p>
-<p class="lead">Lorem ipsum dolor sit amet consectetur adipisicing elit. Placeat nobis maiores fugit dolores pariatur, facere quaerat iste quos distinctio a hic, illum quasi delectus. Eos illo optio sint doloremque provident!</p>
+<p class="lead">Add new data: The user or the hospital can add new health data for the user. This data will be verified by the hospital and will be visible on this website when the hospital approves of the data.</p>
+<p class="lead">Show Existing data: This will show all the existing health records of the user to that specific user or the hospital.</p>
 {% else %}
 
 <p class="lead">Lorem ipsum, dolor sit amet consectetur adipisicing elit. Eos illum, quasi commodi voluptatibus, sit consequatur, aperiam dolor in perferendis quibusdam eligendi ipsum similique quas laboriosam asperiores expedita deleniti? Nemo, delectus.</p>

@@ -36,7 +36,8 @@ def index(request):
         record = HealthRecord.objects.filter(user=request.user)
         num = len(record)
         if(num==0):
-            unique_id = f"HS-00{num+1}" 
+            num+=1
+            unique_id = f"HS-00{num}"
             record = HealthRecord.objects.create(user=request.user,unique_id=unique_id)
             create_ehr(unique_id)
     return render(request,'records/index.html')
