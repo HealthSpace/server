@@ -3,12 +3,14 @@ from .models import HealthRecord
 from .forms import EHRForm
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from django.contrib.auth import get_user_model
 
 from cryptography.fernet import Fernet
 import hashlib
 import json
 from web3 import Web3
 
+User = get_user_model()
 
 '''
     RPC SETUP
@@ -33,9 +35,9 @@ w3 = Web3(Web3.HTTPProvider(RPC_URL))
 
 def index(request):
     if(request.user.is_authenticated):
-        record = HealthRecord.objects.filter(user=request.user)
-        num = len(record)
-        if(num==0):
+        record = HealthRecord.objects.filter(user=request.user).count()
+        if(record==0):
+            num = HealthRecord.objects.all().count()
             num+=1
             unique_id = f"HS-00{num}"
             record = HealthRecord.objects.create(user=request.user,unique_id=unique_id)

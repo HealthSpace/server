@@ -10,7 +10,10 @@
         <form action="{% url 'add-ehr' %}" method="post">
             {% csrf_token %}
             {{ form|crispy }}
-            <p>Upload Record* (Coming Soon!)</p>
+            <!-- <p>Upload Record* (Coming Soon!)</p> -->
+            <label class="mt-1" for="avatar">Choose the Health Report:</label>
+            <input class="mt-1" type="file" id="avatar" name="avatar" accept="image/png, image/jpeg,.doc,.docx,application/msword,.pdf">
+
             <input class="btn btn-success my-1" type="submit" value="Add Data">
         </form>
     </div>
